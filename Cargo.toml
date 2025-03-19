@@ -1,6 +1,5 @@
-[package]
-name = "talent-scout"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
+[workspace]
+members = [
+    "core",
+]
+resolver = "2"

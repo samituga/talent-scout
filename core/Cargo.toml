@@ -1,0 +1,9 @@
+[package]
+name = "talent-scout"
+version = "0.1.0"
+rust-version = "1.85"
+authors = [ "Samuel Gonçalvess <samuel.c.goncalves07@gmail.com>" ]
+edition = "2024"
+readme = "../README.md"
+
+[dependencies]
