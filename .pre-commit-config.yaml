@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-yaml
+      - id: check-json
+        exclude: ^infra/template/
+      - id: check-vcs-permalinks
+      - id: trailing-whitespace
+        exclude: ^test/
+      - id: mixed-line-ending
+        exclude: ^test/
+
+  - repo: local
+    hooks:
+      - id: sort
+        name: check that cargo dependencies are sorted
+        language: system
+        types: [ file, toml ]
+        entry: cargo sort --check
+        pass_filenames: false
+
+      - id: clippy
+        name: check for warnings in code
+        description: Checks code for warnings
+        language: system
+        types: [ file, rust ]
+        entry: cargo clippy --bins --examples --all -- -D warnings
+        pass_filenames: false
+
+      - id: fmt
+        name: check for errors in the format
+        description: check if all files follow the rustfmt style
+        language: system
+        types: [ file, rust ]
+        entry: cargo +nightly fmt --check
+        pass_filenames: false
