@@ -36,5 +36,5 @@ repos:
         description: check if all files follow the rustfmt style
         language: system
         types: [ file, rust ]
-        entry: cargo +nightly fmt --check
+        entry: cargo +nightly fmt -- --check
         pass_filenames: false

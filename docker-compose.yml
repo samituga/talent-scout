@@ -1,0 +1,17 @@
+services:
+  postgres:
+    environment:
+      - POSTGRES_USER=${SUPERUSER}
+      - POSTGRES_PASSWORD=${SUPERUSER_PWD}
+    healthcheck:
+      test: pg_isready -U ${SUPERUSER} || exit 1
+      interval: 1s
+      timeout: 5s
+      retries: "5"
+    ports:
+      - '${DB_PORT}:5432'
+    container_name: ${CONTAINER_NAME}
+    image: postgres:17.3
+    command: -N 1000
+    volumes:
+      - /data/postgres/talent-scout:/var/lib/postgresql/data

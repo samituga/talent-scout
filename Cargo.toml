@@ -1,5 +1,14 @@
 [workspace]
 members = [
-    "core",
+    "core", "ingestion",
 ]
 resolver = "2"
+
+[workspace.package]
+version = "0.0.0"
+rust-version = "1.85"
+edition = "2024"
+repository = "https://github.com/samituga/talent-scout"
+readme = "README.md"
+authors = ["Samuel Gonçalvess <samuel.c.goncalves07@gmail.com>"]
+license = "TBD"

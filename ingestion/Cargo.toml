@@ -1,0 +1,14 @@
+[package]
+name = "ingestion"
+version.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+repository.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.97"
+futures = "0.3.31"
+riven = "2.66.0"
+tokio = "1.44.1"
