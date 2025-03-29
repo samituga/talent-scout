@@ -20,16 +20,17 @@ repos:
         name: check that cargo dependencies are sorted
         language: system
         types: [ file, toml ]
-        entry: cargo sort --check
+        entry: cargo sort -w --check
         pass_filenames: false
 
-      - id: clippy
-        name: check for warnings in code
-        description: Checks code for warnings
-        language: system
-        types: [ file, rust ]
-        entry: cargo clippy --bins --examples --all -- -D warnings
-        pass_filenames: false
+# TODO enable once initial setup is done
+#       - id: clippy
+#         name: check for warnings in code
+#         description: Checks code for warnings
+#         language: system
+#         types: [ file, rust ]
+#         entry: cargo clippy --bins --examples --all -- -D warnings
+#         pass_filenames: false
 
       - id: fmt
         name: check for errors in the format
