@@ -10,5 +10,4 @@ pub mod participant_perks;
 pub mod participants;
 pub mod perk_style_selections;
 pub mod perk_styles;
-pub mod sea_orm_active_enums;
 pub mod teams;

@@ -2,18 +2,13 @@
 
 use sea_orm::entity::prelude::*;
 
-use super::sea_orm_active_enums::{
-    ChallengesFasterSupportQuestCompletion, ChallengesHadAfkTeammate, ChallengesHighestCrowdControlScore,
-    ChallengesHighestWardKills, ChallengesLaningPhaseGoldExpAdvantage, ChallengesPlayedChampSelectPosition,
-};
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(schema_name = "match_v5", table_name = "challenges")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
     pub match_id: String,
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub participant_id: i32,
+    #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
+    pub puuid: String,
     pub x_12_assist_streak_count: Option<i32>,
     pub baron_buff_gold_advantage_over_threshold: Option<i32>,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
@@ -26,23 +21,23 @@ pub struct Model {
     pub earliest_elder_dragon: Option<Decimal>,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
     pub early_laning_phase_gold_exp_advantage: Option<Decimal>,
-    pub faster_support_quest_completion: Option<ChallengesFasterSupportQuestCompletion>,
+    pub faster_support_quest_completion: Option<bool>,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
     pub fastest_legendary: Option<Decimal>,
-    pub had_afk_teammate: Option<ChallengesHadAfkTeammate>,
+    pub had_afk_teammate: Option<bool>,
     pub highest_champion_damage: Option<i32>,
-    pub highest_crowd_control_score: Option<ChallengesHighestCrowdControlScore>,
-    pub highest_ward_kills: Option<ChallengesHighestWardKills>,
+    pub highest_crowd_control_score: Option<bool>,
+    pub highest_ward_kills: Option<bool>,
     pub jungler_kills_early_jungle: Option<i32>,
     pub kills_on_laners_early_jungle_as_jungler: Option<i32>,
-    pub laning_phase_gold_exp_advantage: Option<ChallengesLaningPhaseGoldExpAdvantage>,
+    pub laning_phase_gold_exp_advantage: Option<bool>,
     pub legendary_count: Option<i32>,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
     pub max_cs_advantage_on_lane_opponent: Option<Decimal>,
     pub max_level_lead_lane_opponent: Option<i32>,
     pub most_wards_destroyed_one_sweeper: Option<i32>,
     pub mythic_item_used: Option<i32>,
-    pub played_champ_select_position: Option<ChallengesPlayedChampSelectPosition>,
+    pub played_champ_select_position: Option<bool>,
     pub solo_turrets_lategame: Option<i32>,
     pub takedowns_first25_minutes: Option<i32>,
     pub teleport_takedowns: Option<i32>,
@@ -74,7 +69,7 @@ pub struct Model {
     pub dodge_skill_shots_small_window: Option<i32>,
     pub double_aces: Option<i32>,
     pub dragon_takedowns: Option<i32>,
-    pub legendary_item_used: Option<Json>,
+    pub legendary_item_used: Option<Vec<i32>>,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
     pub effective_heal_and_shielding: Option<Decimal>,
     pub elder_dragon_kills_with_opposing_soul: Option<i32>,
@@ -195,8 +190,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::participants::Entity",
-        from = "(Column::MatchId, Column::ParticipantId)",
-        to = "(super::participants::Column::MatchId, super::participants::Column::ParticipantId)",
+        from = "(Column::MatchId, Column::Puuid)",
+        to = "(super::participants::Column::MatchId, super::participants::Column::Puuid)",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]

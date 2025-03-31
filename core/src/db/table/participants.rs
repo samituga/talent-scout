@@ -6,9 +6,9 @@ use sea_orm::entity::prelude::*;
 #[sea_orm(schema_name = "match_v5", table_name = "participants")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
+    pub puuid: String,
+    #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
     pub match_id: String,
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub participant_id: i32,
     pub all_in_pings: Option<i32>,
     pub assist_me_pings: Option<i32>,
     pub assists: i32,
@@ -75,6 +75,7 @@ pub struct Model {
     pub objectives_stolen: i32,
     pub objectives_stolen_assists: i32,
     pub on_my_way_pings: Option<i32>,
+    pub participant_id: i32,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
     pub player_score0: Option<Decimal>,
     #[sea_orm(column_type = "Decimal(Some((20, 9)))", nullable)]
@@ -111,8 +112,6 @@ pub struct Model {
     pub player_subteam_id: Option<i32>,
     pub push_pings: Option<i32>,
     pub profile_icon: i32,
-    #[sea_orm(column_type = "Text")]
-    pub puuid: String,
     pub quadra_kills: i32,
     #[sea_orm(column_type = "Text", nullable)]
     pub riot_id_game_name: Option<String>,

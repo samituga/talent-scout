@@ -1,7 +1,7 @@
 CREATE TABLE match_v5.participants
 (
+    puuid                              TEXT    NOT NULL,
     match_id                           TEXT    NOT NULL,
-    participant_id                     INTEGER NOT NULL,
 
     all_in_pings                       INTEGER,
     assist_me_pings                    INTEGER,
@@ -68,6 +68,7 @@ CREATE TABLE match_v5.participants
     objectives_stolen                  INTEGER NOT NULL,
     objectives_stolen_assists          INTEGER NOT NULL,
     on_my_way_pings                    INTEGER,
+    participant_id                     INTEGER NOT NULL,
     player_score0                      DECIMAL(20, 9),
     player_score1                      DECIMAL(20, 9),
     player_score2                      DECIMAL(20, 9),
@@ -93,7 +94,6 @@ CREATE TABLE match_v5.participants
     player_subteam_id                  INTEGER,
     push_pings                         INTEGER,
     profile_icon                       INTEGER NOT NULL,
-    puuid                              TEXT    NOT NULL,
     quadra_kills                       INTEGER NOT NULL,
     riot_id_game_name                  TEXT,
     riot_id_tagline                    TEXT,
@@ -149,7 +149,7 @@ CREATE TABLE match_v5.participants
     player_augment6                    INTEGER,
     riot_id_name                       TEXT,
     retreat_pings                      INTEGER,
-    PRIMARY KEY (match_id, participant_id),
+    PRIMARY KEY (match_id, puuid),
     FOREIGN KEY (match_id) REFERENCES match_v5.matches (match_id)
 );
 

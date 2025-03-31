@@ -7,8 +7,8 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
     pub match_id: String,
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub participant_id: i32,
+    #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
+    pub puuid: String,
     pub defense: i32,
     pub flex: i32,
     pub offense: i32,
@@ -18,8 +18,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::participants::Entity",
-        from = "(Column::MatchId, Column::ParticipantId)",
-        to = "(super::participants::Column::MatchId, super::participants::Column::ParticipantId)",
+        from = "(Column::MatchId, Column::Puuid)",
+        to = "(super::participants::Column::MatchId, super::participants::Column::Puuid)",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]

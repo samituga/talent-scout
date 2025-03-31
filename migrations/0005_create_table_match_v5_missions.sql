@@ -1,7 +1,7 @@
 CREATE TABLE match_v5.missions
 (
-    match_id       TEXT    NOT NULL,
-    participant_id INTEGER NOT NULL,
+    match_id       TEXT NOT NULL,
+    puuid          TEXT NOT NULL,
 
     player_score0  DECIMAL(20, 9),
     player_score1  DECIMAL(20, 9),
@@ -15,9 +15,9 @@ CREATE TABLE match_v5.missions
     player_score9  DECIMAL(20, 9),
     player_score10 DECIMAL(20, 9),
     player_score11 DECIMAL(20, 9),
-    PRIMARY KEY (match_id, participant_id),
-    FOREIGN KEY (match_id, participant_id)
-        REFERENCES match_v5.participants (match_id, participant_id)
+    PRIMARY KEY (match_id, puuid),
+    FOREIGN KEY (match_id, puuid)
+        REFERENCES match_v5.participants (match_id, puuid)
 );
 
 

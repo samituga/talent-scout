@@ -1,7 +1,7 @@
 CREATE TABLE match_v5.challenges
 (
-    match_id                                          TEXT    NOT NULL,
-    participant_id                                    INTEGER NOT NULL,
+    match_id                                          TEXT NOT NULL,
+    puuid                                             TEXT NOT NULL,
 
     x_12_assist_streak_count                          INTEGER,
     baron_buff_gold_advantage_over_threshold          INTEGER,
@@ -10,21 +10,21 @@ CREATE TABLE match_v5.challenges
     earliest_dragon_takedown                          DECIMAL(20, 9),
     earliest_elder_dragon                             DECIMAL(20, 9),
     early_laning_phase_gold_exp_advantage             DECIMAL(20, 9),
-    faster_support_quest_completion                   match_v5.challenges_faster_support_quest_completion,
+    faster_support_quest_completion                   BOOLEAN,
     fastest_legendary                                 DECIMAL(20, 9),
-    had_afk_teammate                                  match_v5.challenges_had_afk_teammate,
+    had_afk_teammate                                  BOOLEAN,
     highest_champion_damage                           INTEGER,
-    highest_crowd_control_score                       match_v5.challenges_highest_crowd_control_score,
-    highest_ward_kills                                match_v5.challenges_highest_ward_kills,
+    highest_crowd_control_score                       BOOLEAN,
+    highest_ward_kills                                BOOLEAN,
     jungler_kills_early_jungle                        INTEGER,
     kills_on_laners_early_jungle_as_jungler           INTEGER,
-    laning_phase_gold_exp_advantage                   match_v5.challenges_laning_phase_gold_exp_advantage,
+    laning_phase_gold_exp_advantage                   BOOLEAN,
     legendary_count                                   INTEGER,
     max_cs_advantage_on_lane_opponent                 DECIMAL(20, 9),
     max_level_lead_lane_opponent                      INTEGER,
     most_wards_destroyed_one_sweeper                  INTEGER,
     mythic_item_used                                  INTEGER,
-    played_champ_select_position                      match_v5.challenges_played_champ_select_position,
+    played_champ_select_position                      BOOLEAN,
     solo_turrets_lategame                             INTEGER,
     takedowns_first25_minutes                         INTEGER,
     teleport_takedowns                                INTEGER,
@@ -50,7 +50,7 @@ CREATE TABLE match_v5.challenges
     dodge_skill_shots_small_window                    INTEGER,
     double_aces                                       INTEGER,
     dragon_takedowns                                  INTEGER,
-    legendary_item_used                               JSON,
+    legendary_item_used                               INTEGER[],
     effective_heal_and_shielding                      DECIMAL(20, 9),
     elder_dragon_kills_with_opposing_soul             INTEGER,
     elder_dragon_multikills                           INTEGER,
@@ -151,9 +151,9 @@ CREATE TABLE match_v5.challenges
     ward_takedowns_before20_m                         INTEGER,
     heal_from_map_sources                             DECIMAL(20, 9),
 
-    PRIMARY KEY (match_id, participant_id),
-    FOREIGN KEY (match_id, participant_id)
-        REFERENCES match_v5.participants (match_id, participant_id)
+    PRIMARY KEY (match_id, puuid),
+    FOREIGN KEY (match_id, puuid)
+        REFERENCES match_v5.participants (match_id, puuid)
 );
 
 COMMENT ON TABLE match_v5.challenges IS 'Challenges DTO. Original model name - match-v5.ChallengesDto.';

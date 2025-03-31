@@ -9,7 +9,8 @@ pub struct Model {
     pub perk_style_id: i32,
     #[sea_orm(column_type = "Text")]
     pub match_id: String,
-    pub participant_id: i32,
+    #[sea_orm(column_type = "Text")]
+    pub puuid: String,
     #[sea_orm(column_type = "Text")]
     pub description: String,
     pub style: i32,
@@ -19,8 +20,8 @@ pub struct Model {
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::participant_perks::Entity",
-        from = "(Column::MatchId, Column::ParticipantId)",
-        to = "(super::participant_perks::Column::MatchId, super::participant_perks::Column::ParticipantId)",
+        from = "(Column::MatchId, Column::Puuid)",
+        to = "(super::participant_perks::Column::MatchId, super::participant_perks::Column::Puuid)",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
