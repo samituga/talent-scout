@@ -5,8 +5,8 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(schema_name = "match_v5", table_name = "perk_styles")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub perk_style_id: i32,
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub perk_style_id: Uuid,
     #[sea_orm(column_type = "Text")]
     pub match_id: String,
     #[sea_orm(column_type = "Text")]

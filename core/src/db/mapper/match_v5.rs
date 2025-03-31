@@ -1,6 +1,10 @@
+// TODO check performance when
+
 use std::sync::Arc;
 
 use riven::{consts, models::match_v5};
+use sea_orm::IntoActiveModel;
+use uuid::Uuid;
 
 use crate::db::{
     mapper::util::{f32_to_decimal, f64_to_decimal, i32_to_bool},
@@ -8,21 +12,20 @@ use crate::db::{
 };
 
 pub struct Models {
-    pub r#match: table::matches::Model,
-    pub teams: Vec<table::teams::Model>,
-    pub bans: Vec<table::bans::Model>,
-    pub objectives: Vec<table::objectives::Model>,
-    pub feats: Vec<table::feats::Model>,
-    pub challenges: Vec<table::challenges::Model>,
-    pub missions: Vec<table::missions::Model>,
-    pub participants: Vec<table::participants::Model>,
-    pub perks: Vec<(
-        table::participant_perks::Model,
-        Vec<(table::perk_styles::Model, Vec<table::perk_style_selections::Model>)>,
-    )>,
+    pub r#match: table::matches::ActiveModel,
+    pub teams: Vec<table::teams::ActiveModel>,
+    pub bans: Vec<table::bans::ActiveModel>,
+    pub objectives: Vec<table::objectives::ActiveModel>,
+    pub feats: Vec<table::feats::ActiveModel>,
+    pub challenges: Vec<table::challenges::ActiveModel>,
+    pub missions: Vec<table::missions::ActiveModel>,
+    pub participants: Vec<table::participants::ActiveModel>,
+    pub perks: Vec<table::participant_perks::ActiveModel>,
+    pub perk_styles: Vec<table::perk_styles::ActiveModel>,
+    pub perks_style_selections: Vec<table::perk_style_selections::ActiveModel>,
 }
 
-pub fn all(m: match_v5::Match) -> Result<Models, anyhow::Error> {
+pub fn all(m: match_v5::Match) -> Models {
     let match_model = match_to_model(&m);
 
     let teams = m.info.teams;
@@ -55,19 +58,19 @@ pub fn all(m: match_v5::Match) -> Result<Models, anyhow::Error> {
         .map(|p| (p.puuid.clone(), p.perks.clone()))
         .collect();
 
-    let feats_model: Vec<table::feats::Model> = feats_vec
+    let feats_model: Vec<table::feats::ActiveModel> = feats_vec
         .into_iter()
         .filter(|(_, feats)| feats.is_some())
         .map(|(team_id, feats)| (team_id, feats.unwrap()))
         .map(|(team_id, feats)| feats_to_model(*match_id.as_ref().clone(), team_id as i32, feats))
         .collect();
 
-    let objectives_model: Vec<table::objectives::Model> = objectives
+    let objectives_model: Vec<table::objectives::ActiveModel> = objectives
         .into_iter()
         .map(|(team_id, objectives)| objectives_to_model(*match_id.as_ref().clone(), team_id as i32, objectives))
         .collect();
 
-    let bans_model: Vec<table::bans::Model> = bans_vec
+    let bans_model: Vec<table::bans::ActiveModel> = bans_vec
         .into_iter()
         .flat_map(|(team_id, bans)| {
             let team_id_other = team_id.clone();
@@ -77,34 +80,49 @@ pub fn all(m: match_v5::Match) -> Result<Models, anyhow::Error> {
         })
         .collect();
 
-    let teams_model: Vec<table::teams::Model> = teams
+    let teams_model: Vec<table::teams::ActiveModel> = teams
         .into_iter()
         .map(|team| team_to_model(*match_id.as_ref().clone(), team))
         .collect();
 
     let perks_model: Vec<(
-        table::participant_perks::Model,
-        Vec<(table::perk_styles::Model, Vec<table::perk_style_selections::Model>)>,
+        table::participant_perks::ActiveModel,
+        Vec<(
+            table::perk_styles::ActiveModel,
+            Vec<table::perk_style_selections::ActiveModel>,
+        )>,
     )> = perks
         .into_iter()
         .map(|(puuid, perks)| perks_to_model(*match_id.as_ref().clone(), puuid, perks))
         .collect();
 
-    let missions_model: Vec<table::missions::Model> = missions
+    let (perks_model, perk_styles_model, perk_style_selections_model) = perks_model.into_iter().fold(
+        (Vec::new(), Vec::new(), Vec::new()),
+        |(mut acc_pp, mut acc_ps, mut acc_pss), (pp, ps_with_sel)| {
+            acc_pp.push(pp);
+            for (ps, sel) in ps_with_sel {
+                acc_ps.push(ps);
+                acc_pss.extend(sel);
+            }
+            (acc_pp, acc_ps, acc_pss)
+        },
+    );
+
+    let missions_model: Vec<table::missions::ActiveModel> = missions
         .into_iter()
         .filter(|(_, missions)| missions.is_some())
         .map(|(puuid, missions)| (puuid, missions.unwrap()))
         .map(|(puuid, missions)| missions_to_model(*match_id.as_ref().clone(), puuid, missions))
         .collect();
 
-    let challenges_model: Vec<table::challenges::Model> = challenges
+    let challenges_model: Vec<table::challenges::ActiveModel> = challenges
         .into_iter()
         .filter(|(_, challenges)| challenges.is_some())
         .map(|(puuid, challenges)| (puuid, challenges.unwrap()))
         .map(|(puuid, challenges)| challenges_to_model(*match_id.as_ref().clone(), puuid, challenges))
         .collect();
 
-    let participants_model: Vec<table::participants::Model> = participants
+    let participants_model: Vec<table::participants::ActiveModel> = participants
         .into_iter()
         .map(|participant| participants_to_model(participant, *match_id.as_ref().clone()))
         .collect();
@@ -119,13 +137,14 @@ pub fn all(m: match_v5::Match) -> Result<Models, anyhow::Error> {
         missions: missions_model,
         participants: participants_model,
         perks: perks_model,
+        perk_styles: perk_styles_model,
+        perks_style_selections: perk_style_selections_model,
     };
 
-    Ok(models)
+    models
 }
 
-// TODO check if this is ok, many clones
-fn match_to_model(m: &match_v5::Match) -> table::matches::Model {
+fn match_to_model(m: &match_v5::Match) -> table::matches::ActiveModel {
     let metadata = &m.metadata;
     let info = &m.info;
 
@@ -150,9 +169,10 @@ fn match_to_model(m: &match_v5::Match) -> table::matches::Model {
         queue_id: info.queue_id.0 as i32,
         tournament_code: info.tournament_code.clone(),
     }
+    .into_active_model()
 }
 
-fn participants_to_model(participant: match_v5::Participant, match_id: String) -> table::participants::Model {
+fn participants_to_model(participant: match_v5::Participant, match_id: String) -> table::participants::ActiveModel {
     let champion_id = participant.champion().expect("FromStr imp for String is infallible").0 as i32;
 
     let player_score0 = participant.player_score0.map(f32_to_decimal);
@@ -315,13 +335,14 @@ fn participants_to_model(participant: match_v5::Participant, match_id: String) -
         riot_id_name: participant.riot_id_name,
         retreat_pings: participant.retreat_pings,
     }
+    .into_active_model()
 }
 
 pub fn challenges_to_model(
     match_id: String,
     puuid: String,
     challenges: match_v5::Challenges,
-) -> table::challenges::Model {
+) -> table::challenges::ActiveModel {
     let control_ward_time_coverage_in_river_or_enemy_half = challenges
         .control_ward_time_coverage_in_river_or_enemy_half
         .map(f32_to_decimal);
@@ -511,9 +532,10 @@ pub fn challenges_to_model(
         ward_takedowns_before20_m: challenges.ward_takedowns_before20_m,
         heal_from_map_sources,
     }
+    .into_active_model()
 }
 
-fn missions_to_model(match_id: String, puuid: String, missions: match_v5::Missions) -> table::missions::Model {
+fn missions_to_model(match_id: String, puuid: String, missions: match_v5::Missions) -> table::missions::ActiveModel {
     let player_score0 = missions.player_score0.map(f32_to_decimal);
     let player_score1 = missions.player_score1.map(f32_to_decimal);
     let player_score2 = missions.player_score2.map(f32_to_decimal);
@@ -543,17 +565,19 @@ fn missions_to_model(match_id: String, puuid: String, missions: match_v5::Missio
         player_score10,
         player_score11,
     }
+    .into_active_model()
 }
 
-// TODO this doesn't look good, the ids
-// TODO maybe use UUID instead of relying on the BD to generate the ids
 fn perks_to_model(
     match_id: String,
     puuid: String,
     perks: match_v5::Perks,
 ) -> (
-    table::participant_perks::Model,
-    Vec<(table::perk_styles::Model, Vec<table::perk_style_selections::Model>)>,
+    table::participant_perks::ActiveModel,
+    Vec<(
+        table::perk_styles::ActiveModel,
+        Vec<table::perk_style_selections::ActiveModel>,
+    )>,
 ) {
     let participant_perks = table::participant_perks::Model {
         match_id: match_id.clone(),
@@ -561,30 +585,36 @@ fn perks_to_model(
         defense: perks.stat_perks.defense,
         flex: perks.stat_perks.flex,
         offense: perks.stat_perks.offense,
-    };
+    }
+    .into_active_model();
 
     let perk_styles_selection = perks
         .styles
         .into_iter()
         .map(|style| {
+            let perk_style_id = Uuid::new_v4();
             let perk_style = table::perk_styles::Model {
-                perk_style_id: 0, // SERIAL
+                perk_style_id,
                 match_id: match_id.clone(),
                 puuid: puuid.clone(),
                 description: style.description.clone(),
                 style: style.style,
-            };
+            }
+            .into_active_model();
 
-            let selections: Vec<table::perk_style_selections::Model> = style
+            let selections: Vec<table::perk_style_selections::ActiveModel> = style
                 .selections
                 .into_iter()
-                .map(|sel| table::perk_style_selections::Model {
-                    perk_style_selection_id: 0, // SERIAL
-                    perk_style_id: 0,           // Needs to be updated with correct id after perk style insert
-                    perk: sel.perk,
-                    var1: sel.var1,
-                    var2: sel.var2,
-                    var3: sel.var3,
+                .map(|sel| {
+                    table::perk_style_selections::Model {
+                        perk_style_selection_id: Uuid::new_v4(),
+                        perk_style_id,
+                        perk: sel.perk,
+                        var1: sel.var1,
+                        var2: sel.var2,
+                        var3: sel.var3,
+                    }
+                    .into_active_model()
                 })
                 .collect();
 
@@ -595,25 +625,31 @@ fn perks_to_model(
     (participant_perks, perk_styles_selection)
 }
 
-fn team_to_model(match_id: String, team: match_v5::Team) -> table::teams::Model {
+fn team_to_model(match_id: String, team: match_v5::Team) -> table::teams::ActiveModel {
     table::teams::Model {
         match_id,
         team_id: team.team_id as i32,
         win: team.win,
     }
+    .into_active_model()
 }
 
-fn ban_to_model(match_id: String, team_id: i32, ban: match_v5::Ban) -> table::bans::Model {
+fn ban_to_model(match_id: String, team_id: i32, ban: match_v5::Ban) -> table::bans::ActiveModel {
     table::bans::Model {
-        ban_id: 0, // SERIAL
+        ban_id: Uuid::new_v4(),
         match_id,
         team_id,
         champion_id: ban.champion_id.0 as i32,
         pick_turn: ban.pick_turn,
     }
+    .into_active_model()
 }
 
-fn objectives_to_model(match_id: String, team_id: i32, objectives: match_v5::Objectives) -> table::objectives::Model {
+fn objectives_to_model(
+    match_id: String,
+    team_id: i32,
+    objectives: match_v5::Objectives,
+) -> table::objectives::ActiveModel {
     fn map_objective(obj: &match_v5::Objective) -> (bool, i32) {
         (obj.first, obj.kills)
     }
@@ -661,9 +697,10 @@ fn objectives_to_model(match_id: String, team_id: i32, objectives: match_v5::Obj
         atakhan_first,
         atakhan_kills,
     }
+    .into_active_model()
 }
 
-fn feats_to_model(match_id: String, team_id: i32, feats: match_v5::Feats) -> table::feats::Model {
+fn feats_to_model(match_id: String, team_id: i32, feats: match_v5::Feats) -> table::feats::ActiveModel {
     let epic_monster_kill_state = feats.epic_monster_kill.and_then(|feat| feat.feat_state);
     let first_blood_state = feats.first_blood.and_then(|feat| feat.feat_state);
     let first_turret_state = feats.first_turret.and_then(|feat| feat.feat_state);
@@ -674,5 +711,29 @@ fn feats_to_model(match_id: String, team_id: i32, feats: match_v5::Feats) -> tab
         epic_monster_kill_state,
         first_blood_state,
         first_turret_state,
+    }
+    .into_active_model()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{fs, path::Path};
+
+    use super::*;
+
+    fn m() -> Result<match_v5::Match, Box<dyn std::error::Error>> {
+        let fixture_path = Path::new("fixtures/match_v5.match_arena.json");
+        let json_data = fs::read_to_string(fixture_path)?;
+        let m = serde_json::from_str(&json_data)?;
+        Ok(m)
+    }
+
+    #[test]
+    fn test() {
+        // Arrange
+        let m = m().unwrap();
+
+        // Act
+        let model = all(m);
     }
 }

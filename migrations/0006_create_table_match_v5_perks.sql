@@ -16,7 +16,7 @@ COMMENT ON TABLE match_v5.participant_perks IS 'Original model name - match-v5.P
 
 CREATE TABLE match_v5.perk_styles
 (
-    perk_style_id SERIAL PRIMARY KEY, -- TODO decide if serial or uuid and generated in the application
+    perk_style_id UUID PRIMARY KEY,
     match_id      TEXT    NOT NULL,
     puuid         TEXT    NOT NULL,
 
@@ -30,8 +30,8 @@ COMMENT ON TABLE match_v5.perk_styles IS 'Original model name - match-v5.PerkSty
 
 CREATE TABLE match_v5.perk_style_selections
 (
-    perk_style_selection_id SERIAL PRIMARY KEY,
-    perk_style_id           INTEGER NOT NULL,
+    perk_style_selection_id UUID PRIMARY KEY,
+    perk_style_id           UUID    NOT NULL,
 
     perk                    INTEGER NOT NULL,
     var1                    INTEGER NOT NULL,

@@ -1,7 +1,10 @@
 use dotenvy::dotenv;
 use secrecy::{ExposeSecret, SecretString};
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::postgres::{PgConnectOptions, PgSslMode};
+use sqlx::{
+    ConnectOptions,
+    postgres::{PgConnectOptions, PgSslMode},
+};
 
 use crate::environment::ENVIRONMENT;
 
@@ -22,7 +25,7 @@ pub struct DatabaseSettings {
 }
 
 impl DatabaseSettings {
-    pub fn connect_options(&self) -> PgConnectOptions {
+    pub fn sqlx_connect_options(&self) -> PgConnectOptions {
         let ssl_mode = if self.require_ssl {
             PgSslMode::Require
         } else {
@@ -36,7 +39,22 @@ impl DatabaseSettings {
             .port(self.port)
             .ssl_mode(ssl_mode)
             .database(&self.database_name)
-        // .log_statements(log::LevelFilter::Trace)
+            .log_statements(log::LevelFilter::Trace)
+    }
+
+    pub fn pg_connect_options(&self) -> sea_orm::ConnectOptions {
+        let ssl_mode = if self.require_ssl { "require" } else { "prefer" };
+
+        let mut opt = sea_orm::ConnectOptions::new(format!(
+            "postgres://{}:{}@{}/{}?sslmode={}",
+            self.username,
+            self.password.expose_secret(),
+            self.host,
+            self.database_name,
+            ssl_mode
+        ));
+        opt.sqlx_logging(true).sqlx_logging_level(log::LevelFilter::Info);
+        opt
     }
 }
 

@@ -4,7 +4,7 @@ CREATE TABLE match_v5.teams
 
 --     bans       JSON    NOT NULL,
 --     objectives TEXT    NOT NULL,
-    team_id  INTEGER NOT NULL, -- TODO team_id might already be unique and I wouldn't need a composite primary key
+    team_id  INTEGER NOT NULL,
     win      BOOLEAN NOT NULL,
 --     feats    TEXT,
     PRIMARY KEY (match_id, team_id),
@@ -16,7 +16,7 @@ COMMENT ON COLUMN match_v5.teams.team_id IS 'Original param name - teamId.';
 
 CREATE TABLE match_v5.bans
 (
-    ban_id      SERIAL  NOT NULL,
+    ban_id      UUID    NOT NULL,
     match_id    TEXT    NOT NULL,
     team_id     INTEGER NOT NULL,
 

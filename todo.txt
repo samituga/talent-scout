@@ -1,2 +1,5 @@
 Check composite keys, which column is best to be indexed (place it left)
 Might also need to create indexes
+
+The mappers might need to be slightly refactored to account for better performance,
+but with the current rate limit it does not matter

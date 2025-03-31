@@ -2,7 +2,7 @@ use chrono::DateTime;
 use rust_decimal::{Decimal, prelude::FromPrimitive};
 use sea_orm::prelude::DateTimeWithTimeZone;
 
-// TODO check if this works
+// TODO check how it is represented in DB
 pub fn f32_to_decimal(n: f32) -> Decimal {
     Decimal::from_f32(n).expect("Failed to convert f32 to decimal") // Need to confirm if this ever fails
 }

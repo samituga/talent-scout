@@ -5,8 +5,8 @@ use sea_orm::entity::prelude::*;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
 #[sea_orm(schema_name = "match_v5", table_name = "bans")]
 pub struct Model {
-    #[sea_orm(primary_key)]
-    pub ban_id: i32,
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub ban_id: Uuid,
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
     pub match_id: String,
     #[sea_orm(primary_key, auto_increment = false)]
