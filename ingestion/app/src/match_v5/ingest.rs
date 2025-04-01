@@ -22,7 +22,7 @@ pub async fn ingest(
                 tracing::info!("Fetching match info for id: {}", id);
                 match fetch_match_info(api, route, &id).await {
                     Ok(m) => tokio::spawn(async move {
-                        let models = mapper::match_v5::all(m);
+                        let models = mapper::match_v5::r#match::all(m);
                         if let Err(e) = database.insert_match_v5_match(models).await {
                             tracing::error!("Failed to insert match {}: {:?}", id, e);
                         } else {
@@ -55,7 +55,7 @@ pub async fn ingest_match(
 ) -> anyhow::Result<()> {
     let m = fetch_match_info(api, route, match_id).await?;
 
-    let models = mapper::match_v5::all(m);
+    let models = mapper::match_v5::r#match::all(m);
     database
         .insert_match_v5_match(models)
         .await

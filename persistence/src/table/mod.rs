@@ -2,7 +2,12 @@
 
 pub mod bans;
 pub mod challenges;
+pub mod champion_stats;
+pub mod damage_stats;
+pub mod events_timeline;
 pub mod feats;
+pub mod frames;
+pub mod match_timeline_victim_damage;
 pub mod matches;
 pub mod missions;
 pub mod objectives;
@@ -10,4 +15,8 @@ pub mod participant_perks;
 pub mod participants;
 pub mod perk_style_selections;
 pub mod perk_styles;
+pub mod sea_orm_active_enums;
 pub mod teams;
+pub mod timeline_participant_frames;
+pub mod timeline_participants;
+pub mod timelines;

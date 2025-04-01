@@ -5,8 +5,6 @@ mod telemetry;
 
 use anyhow::Result;
 use dotenvy::dotenv;
-use ingestion_app::match_v5::ingest::ingest;
-use riven::{RiotApi, consts::PlatformRoute};
 
 use crate::{application::Application, config::get_configuration};
 
@@ -21,20 +19,24 @@ async fn main() -> Result<()> {
 
     let app = Application::build(configuration).await?;
 
-    let api_key = std::env::var("RGAPI_KEY").expect("RGAPI_KEY env missing");
-    let riot_api = RiotApi::new(api_key);
+    let m_ids = app.database.fetch_all_match_ids().await?;
 
-    let platform = PlatformRoute::EUW1;
+    println!("Match IDs: {:?}", m_ids);
 
-    let account = riot_api
-        .account_v1()
-        .get_by_riot_id(platform.to_regional(), "avada", "AVD")
-        .await
-        .expect("Get summoner failed.")
-        .expect("There is no summoner with that name.");
-
-    ingest(&riot_api, &account.puuid, platform.to_regional(), app.database.clone()).await?;
-    // ingest_match(
+    // let api_key = std::env::var("RGAPI_KEY").expect("RGAPI_KEY env missing");
+    // let riot_api = RiotApi::new(api_key);
+    //
+    // let platform = PlatformRoute::EUW1;
+    //
+    // let account = riot_api
+    //     .account_v1()
+    //     .get_by_riot_id(platform.to_regional(), "avada", "AVD")
+    //     .await
+    //     .expect("Get summoner failed.")
+    //     .expect("There is no summoner with that name.");
+    //
+    // ingest(&riot_api, &account.puuid, platform.to_regional(),
+    // app.database.clone()).await?; ingest_match(
     //     &riot_api,
     //     "EUW1_7291285667",
     //     platform.to_regional(),

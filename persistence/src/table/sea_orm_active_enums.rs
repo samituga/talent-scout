@@ -3,66 +3,10 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
-#[sea_orm(
-    rs_type = "String",
-    db_type = "Enum",
-    enum_name = "challenges_faster_support_quest_completion"
-)]
-pub enum ChallengesFasterSupportQuestCompletion {
-    #[sea_orm(string_value = "0")]
-    _0,
-    #[sea_orm(string_value = "1")]
-    _1,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "challenges_had_afk_teammate")]
-pub enum ChallengesHadAfkTeammate {
-    #[sea_orm(string_value = "0")]
-    _0,
-    #[sea_orm(string_value = "1")]
-    _1,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
-#[sea_orm(
-    rs_type = "String",
-    db_type = "Enum",
-    enum_name = "challenges_highest_crowd_control_score"
-)]
-pub enum ChallengesHighestCrowdControlScore {
-    #[sea_orm(string_value = "0")]
-    _0,
-    #[sea_orm(string_value = "1")]
-    _1,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
-#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "challenges_highest_ward_kills")]
-pub enum ChallengesHighestWardKills {
-    #[sea_orm(string_value = "0")]
-    _0,
-    #[sea_orm(string_value = "1")]
-    _1,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
-#[sea_orm(
-    rs_type = "String",
-    db_type = "Enum",
-    enum_name = "challenges_laning_phase_gold_exp_advantage"
-)]
-pub enum ChallengesLaningPhaseGoldExpAdvantage {
-    #[sea_orm(string_value = "0")]
-    _0,
-    #[sea_orm(string_value = "1")]
-    _1,
-}
-#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
-#[sea_orm(
-    rs_type = "String",
-    db_type = "Enum",
-    enum_name = "challenges_played_champ_select_position"
-)]
-pub enum ChallengesPlayedChampSelectPosition {
-    #[sea_orm(string_value = "0")]
-    _0,
-    #[sea_orm(string_value = "1")]
-    _1,
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "damage_direction")]
+pub enum DamageDirection {
+    #[sea_orm(string_value = "dealt")]
+    Dealt,
+    #[sea_orm(string_value = "received")]
+    Received,
 }

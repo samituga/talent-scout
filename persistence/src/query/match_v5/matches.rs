@@ -1,8 +1,8 @@
-use sea_orm::{DbErr, EntityTrait, TransactionTrait};
+use sea_orm::{DbErr, EntityTrait, PaginatorTrait, QuerySelect, TransactionTrait};
 
 use crate::{
     Database,
-    mapper::match_v5,
+    mapper::match_v5::r#match,
     table::{
         bans, challenges, feats, matches, missions, objectives, participant_perks, participants, perk_style_selections,
         perk_styles, teams,
@@ -10,8 +10,8 @@ use crate::{
 };
 
 impl Database {
-    pub async fn insert_match_v5_match(&self, models: match_v5::MatchModels) -> Result<(), DbErr> {
-        let txn = self.pool.begin().await?;
+    pub async fn insert_match_v5_match(&self, models: r#match::MatchModels) -> Result<(), DbErr> {
+        let txn = self.connection.begin().await?;
 
         matches::Entity::insert(models.r#match).exec(&txn).await?;
         participants::Entity::insert_many(models.participants)
@@ -44,5 +44,25 @@ impl Database {
         txn.commit().await?;
 
         Ok(())
+    }
+
+    pub async fn fetch_all_match_ids(&self) -> Result<Vec<String>, DbErr> {
+        matches::Entity::find()
+            .select_only()
+            .column(matches::Column::MatchId)
+            .into_tuple()
+            .all(&self.connection)
+            .await
+    }
+
+    pub async fn fetch_match_ids_paginated(&self, page: u64, page_size: u64) -> Result<Vec<String>, DbErr> {
+        let match_ids = matches::Entity::find()
+            .select_only()
+            .column(matches::Column::MatchId)
+            .into_tuple()
+            .paginate(&self.connection, page_size)
+            .fetch_page(page)
+            .await?;
+        Ok(match_ids)
     }
 }

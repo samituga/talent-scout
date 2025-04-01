@@ -11,7 +11,7 @@ pub mod table;
 
 pub struct Database {
     options: ConnectOptions,
-    pool: DatabaseConnection,
+    connection: DatabaseConnection,
 }
 
 impl Database {
@@ -20,7 +20,7 @@ impl Database {
         let options = config.pg_connect_options();
         Ok(Self {
             options: options.clone(),
-            pool: sea_orm::Database::connect(options)
+            connection: sea_orm::Database::connect(options)
                 .await
                 .context("Failed to connect to the database")?,
         })

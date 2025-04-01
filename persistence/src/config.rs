@@ -1,9 +1,5 @@
 use secrecy::{ExposeSecret, SecretString};
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::{
-    ConnectOptions,
-    postgres::{PgConnectOptions, PgSslMode},
-};
 
 #[derive(serde::Deserialize, Clone)]
 pub struct DatabaseSettings {
@@ -17,23 +13,6 @@ pub struct DatabaseSettings {
 }
 
 impl DatabaseSettings {
-    pub fn sqlx_connect_options(&self) -> PgConnectOptions {
-        let ssl_mode = if self.require_ssl {
-            PgSslMode::Require
-        } else {
-            PgSslMode::Prefer
-        };
-
-        PgConnectOptions::new()
-            .host(&self.host)
-            .username(&self.username)
-            .password(self.password.expose_secret())
-            .port(self.port)
-            .ssl_mode(ssl_mode)
-            .database(&self.database_name)
-            .log_statements(log::LevelFilter::Trace)
-    }
-
     pub fn pg_connect_options(&self) -> sea_orm::ConnectOptions {
         let ssl_mode = if self.require_ssl { "require" } else { "prefer" };
 
