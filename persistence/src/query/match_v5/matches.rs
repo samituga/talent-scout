@@ -11,7 +11,7 @@ use crate::{
 
 impl Database {
     pub async fn insert_match_v5_match(&self, models: r#match::MatchModels) -> Result<(), DbErr> {
-        let txn = self.connection.begin().await?;
+        let txn = self.pool.begin().await?;
 
         matches::Entity::insert(models.r#match).exec(&txn).await?;
         participants::Entity::insert_many(models.participants)
@@ -51,7 +51,7 @@ impl Database {
             .select_only()
             .column(matches::Column::MatchId)
             .into_tuple()
-            .all(&self.connection)
+            .all(&self.pool)
             .await
     }
 
@@ -60,7 +60,7 @@ impl Database {
             .select_only()
             .column(matches::Column::MatchId)
             .into_tuple()
-            .paginate(&self.connection, page_size)
+            .paginate(&self.pool, page_size)
             .fetch_page(page)
             .await?;
         Ok(match_ids)

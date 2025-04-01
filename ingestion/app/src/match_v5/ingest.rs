@@ -47,6 +47,66 @@ pub async fn ingest(
     tracing::info!("Ingestion complete.");
     Ok(())
 }
+
+pub async fn ingest_timelines(
+    api: &riven::RiotApi,
+    match_ids: Vec<String>,
+    route: riven::consts::RegionalRoute,
+    database: Arc<Box<Database>>,
+) -> anyhow::Result<()> {
+    tracing::info!("Fetched {} match IDs", match_ids.len());
+
+    let join_handles: Vec<JoinHandle<()>> = stream::iter(match_ids)
+        .map(|id| {
+            let database = database.clone();
+            async move {
+                tracing::info!("Fetching timeline for match_id: {}", id);
+                match fetch_timeline(api, route, &id).await {
+                    Ok(m) => tokio::spawn(async move {
+                        let models = mapper::match_v5::timeline::all(m);
+                        if let Err(e) = database.insert_match_v5_timeline(models).await {
+                            tracing::error!("Failed to insert match {}: {:?}", id, e);
+                        } else {
+                            tracing::info!("Match successfully inserted with ID: {}", id);
+                        }
+                    }),
+                    Err(e) => {
+                        tracing::error!("Failed to fetch match {}: {:?}", id, e);
+                        tokio::spawn(async {})
+                    }
+                }
+            }
+        })
+        .buffer_unordered(10)
+        .collect()
+        .await;
+
+    for handle in join_handles {
+        handle.await?;
+    }
+
+    tracing::info!("Ingestion complete.");
+    Ok(())
+}
+
+pub async fn ingest_timeline(
+    api: &riven::RiotApi,
+    match_id: &str,
+    route: riven::consts::RegionalRoute,
+    database: Arc<Box<Database>>,
+) -> anyhow::Result<()> {
+    let timeline = api
+        .match_v5()
+        .get_timeline(route, match_id)
+        .await?
+        .context(format!("No timeline with match id {}", match_id))?;
+
+    let timeline_models = mapper::match_v5::timeline::all(timeline);
+
+    database.insert_match_v5_timeline(timeline_models).await?;
+    Ok(())
+}
+
 pub async fn ingest_match(
     api: &riven::RiotApi,
     match_id: &str,
@@ -94,6 +154,17 @@ pub async fn fetch_match_info(
     match_id: &str,
 ) -> anyhow::Result<match_v5::Match> {
     match api.match_v5().get_match(route, match_id).await? {
+        None => Err(anyhow::anyhow!("No match found with id: {}", match_id)),
+        Some(v5_match) => Ok(v5_match),
+    }
+}
+
+pub async fn fetch_timeline(
+    api: &riven::RiotApi,
+    route: riven::consts::RegionalRoute,
+    match_id: &str,
+) -> anyhow::Result<match_v5::Timeline> {
+    match api.match_v5().get_timeline(route, match_id).await? {
         None => Err(anyhow::anyhow!("No match found with id: {}", match_id)),
         Some(v5_match) => Ok(v5_match),
     }

@@ -36,8 +36,7 @@ pub fn all(m: match_v5::Match) -> MatchModels {
     let objectives: Vec<(consts::Team, match_v5::Objectives)> =
         teams.iter().map(|t| (t.team_id, t.objectives.clone())).collect();
 
-    let bans_vec: Vec<(consts::Team, Vec<match_v5::Ban>)> =
-        teams.iter().map(|t| (t.team_id.clone(), t.bans.clone())).collect();
+    let bans_vec: Vec<(consts::Team, Vec<match_v5::Ban>)> = teams.iter().map(|t| (t.team_id, t.bans.clone())).collect();
 
     let participants = m.info.participants;
 
@@ -73,10 +72,9 @@ pub fn all(m: match_v5::Match) -> MatchModels {
     let bans_model: Vec<table::bans::ActiveModel> = bans_vec
         .into_iter()
         .flat_map(|(team_id, bans)| {
-            let team_id_other = team_id.clone();
             let match_id_other = *match_id.as_ref().clone();
             bans.into_iter()
-                .map(move |ban| ban_to_model(match_id_other.clone(), team_id_other as i32, ban))
+                .map(move |ban| ban_to_model(match_id_other.clone(), team_id as i32, ban))
         })
         .collect();
 
@@ -127,7 +125,7 @@ pub fn all(m: match_v5::Match) -> MatchModels {
         .map(|participant| participants_to_model(participant, *match_id.as_ref().clone()))
         .collect();
 
-    let models = MatchModels {
+    MatchModels {
         r#match: match_model,
         teams: teams_model,
         bans: bans_model,
@@ -139,9 +137,7 @@ pub fn all(m: match_v5::Match) -> MatchModels {
         perks: perks_model,
         perk_styles: perk_styles_model,
         perk_style_selections: perk_style_selections_model,
-    };
-
-    models
+    }
 }
 
 fn match_to_model(m: &match_v5::Match) -> table::matches::ActiveModel {

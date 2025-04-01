@@ -5,6 +5,8 @@ mod telemetry;
 
 use anyhow::Result;
 use dotenvy::dotenv;
+use ingestion_app::match_v5::ingest::ingest_timelines;
+use riven::{RiotApi, consts::PlatformRoute};
 
 use crate::{application::Application, config::get_configuration};
 
@@ -21,13 +23,13 @@ async fn main() -> Result<()> {
 
     let m_ids = app.database.fetch_all_match_ids().await?;
 
-    println!("Match IDs: {:?}", m_ids);
+    let api_key = std::env::var("RGAPI_KEY").expect("RGAPI_KEY env missing");
+    let riot_api = RiotApi::new(api_key);
 
-    // let api_key = std::env::var("RGAPI_KEY").expect("RGAPI_KEY env missing");
-    // let riot_api = RiotApi::new(api_key);
-    //
-    // let platform = PlatformRoute::EUW1;
-    //
+    let platform = PlatformRoute::EUW1;
+
+    ingest_timelines(&riot_api, m_ids, platform.to_regional(), app.database.clone()).await?;
+
     // let account = riot_api
     //     .account_v1()
     //     .get_by_riot_id(platform.to_regional(), "avada", "AVD")

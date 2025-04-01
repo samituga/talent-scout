@@ -8,3 +8,5 @@ but with the current rate limit it does not matter
 
 Turns out participant puuid is not unique for bot matches ("puuid" : "BOT")
 I can probably ignore it, in the future I should filter out the matches I want to store
+
+check the feats table, all values there are 0, maybe I didn't import any normal games since they exist

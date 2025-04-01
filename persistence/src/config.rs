@@ -24,7 +24,7 @@ impl DatabaseSettings {
             self.database_name,
             ssl_mode
         ));
-        opt.sqlx_logging(false).sqlx_logging_level(log::LevelFilter::Error);
+        opt.sqlx_logging(false).sqlx_logging_level(log::LevelFilter::Info);
         opt
     }
 }
