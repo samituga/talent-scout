@@ -1,0 +1,25 @@
+[package]
+name = "persistence"
+version = { workspace = true }
+rust-version = { workspace = true }
+edition = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+license = { workspace = true }
+
+[dependencies]
+anyhow = "1.0.97"
+chrono = "0.4.40"
+log = "0.4.27"
+riven = { version = "2.66.0" }
+rust_decimal = "1.37.1"
+sea-orm = { version = "1.1.7", features = ["sqlx-postgres", "postgres-array", "runtime-tokio-rustls", "chrono"] }
+secrecy = { version = "0.10.3", features = ["serde"] }
+serde = "1.0.219"
+serde-aux = "4.6.0"
+sqlx = { version = "0.8.3", default-features = false, features = ["runtime-tokio-rustls", "macros", "postgres", "migrate", "any"] }
+tracing = "0.1.41"
+uuid = { version = "1.16.0", features = ["v4"] }
+
+[dev-dependencies]
+serde_json = "1.0.140"

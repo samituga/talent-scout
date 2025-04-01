@@ -3,9 +3,10 @@ use sea_orm::{ConnectOptions, DatabaseConnection};
 
 use crate::config::DatabaseSettings;
 
+pub mod config;
 pub mod mapper;
 pub mod migrations;
-pub mod query;
+mod query;
 pub mod table;
 
 pub struct Database {
@@ -21,12 +22,8 @@ impl Database {
             options: options.clone(),
             pool: sea_orm::Database::connect(options)
                 .await
-                .context("Failed to create a database connection")?,
+                .context("Failed to connect to the database")?,
         })
-    }
-
-    pub(crate) fn pool(&self) -> &DatabaseConnection {
-        &self.pool
     }
 
     pub fn options(&self) -> &ConnectOptions {

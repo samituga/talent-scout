@@ -1,4 +1,4 @@
-// TODO check performance when
+// TODO check performance when rate limits are increased
 
 use std::sync::Arc;
 
@@ -6,12 +6,12 @@ use riven::{consts, models::match_v5};
 use sea_orm::IntoActiveModel;
 use uuid::Uuid;
 
-use crate::db::{
+use crate::{
     mapper::util::{f32_to_decimal, f64_to_decimal, i32_to_bool},
     table,
 };
 
-pub struct Models {
+pub struct MatchModels {
     pub r#match: table::matches::ActiveModel,
     pub teams: Vec<table::teams::ActiveModel>,
     pub bans: Vec<table::bans::ActiveModel>,
@@ -22,10 +22,10 @@ pub struct Models {
     pub participants: Vec<table::participants::ActiveModel>,
     pub perks: Vec<table::participant_perks::ActiveModel>,
     pub perk_styles: Vec<table::perk_styles::ActiveModel>,
-    pub perks_style_selections: Vec<table::perk_style_selections::ActiveModel>,
+    pub perk_style_selections: Vec<table::perk_style_selections::ActiveModel>,
 }
 
-pub fn all(m: match_v5::Match) -> Models {
+pub fn all(m: match_v5::Match) -> MatchModels {
     let match_model = match_to_model(&m);
 
     let teams = m.info.teams;
@@ -127,7 +127,7 @@ pub fn all(m: match_v5::Match) -> Models {
         .map(|participant| participants_to_model(participant, *match_id.as_ref().clone()))
         .collect();
 
-    let models = Models {
+    let models = MatchModels {
         r#match: match_model,
         teams: teams_model,
         bans: bans_model,
@@ -138,7 +138,7 @@ pub fn all(m: match_v5::Match) -> Models {
         participants: participants_model,
         perks: perks_model,
         perk_styles: perk_styles_model,
-        perks_style_selections: perk_style_selections_model,
+        perk_style_selections: perk_style_selections_model,
     };
 
     models

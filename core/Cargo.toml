@@ -10,35 +10,16 @@ license = { workspace = true }
 
 [dependencies]
 anyhow = "1.0.97"
-chrono = "0.4.40"
 config = "0.15.11"
 dotenvy = "0.15.7"
-ingestion = { path = "../ingestion" }
-log = "0.4.27"
+ingestion-app = { path = "../ingestion/app" }
 once_cell = "1.21.1"
-riven = { version = "2.66.0", features = ["tracing", "metrics"] }
-rust_decimal = "1.37.1"
-sea-orm = { version = "1.1.7", features = ["sqlx-postgres", "postgres-array", "runtime-tokio-rustls", "chrono"] }
-secrecy = { version = "0.10.3", features = ["serde"] }
+persistence = { path = "../persistence" }
+riven = { version = "2.66.0" }
 serde = "1.0.219"
-serde-aux = "4.6.0"
 tokio = { version = "1.44.1", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.41"
 tracing-bunyan-formatter = "0.3.10"
 tracing-log = "0.2.0"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-uuid = { version = "1.16.0", features = ["v4"] }
 
-[dependencies.sqlx]
-version = "0.8.3"
-default-features = false
-features = [
-    "runtime-tokio-rustls",
-    "macros",
-    "postgres",
-    "migrate",
-    "any",
-]
-
-[dev-dependencies]
-serde_json = "1.0.140"

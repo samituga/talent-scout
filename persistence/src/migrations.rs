@@ -16,7 +16,6 @@ pub async fn run_database_migrations(
         .await
         .map_err(|err| {
             let msg = format!("failed to load migrations: {err:?}");
-            tracing::error!("{}", msg);
             anyhow!(msg)
         })?;
 
@@ -42,7 +41,6 @@ pub async fn run_database_migrations(
                         "checksum mismatch for applied migration {} (version {})",
                         migration.description, migration.version
                     );
-                    tracing::error!("{}", err_msg);
                     return Err(anyhow!(err_msg));
                 } else {
                     tracing::debug!(
@@ -59,7 +57,7 @@ pub async fn run_database_migrations(
                     migration.version
                 );
                 let elapsed = connection.apply(&migration).await?;
-                tracing::info!("Applied migration {} in {:?}", migration.description, elapsed);
+                tracing::debug!("Applied migration {} in {:?}", migration.description, elapsed);
                 new_migrations.push((migration, elapsed));
             }
         }
