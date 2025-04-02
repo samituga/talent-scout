@@ -5,14 +5,14 @@ use uuid::Uuid;
 use crate::table;
 
 pub struct TimelineModels {
-    pub timeline: table::timelines::ActiveModel,
-    pub timeline_participants: Vec<table::timeline_participants::ActiveModel>,
-    pub frames: Vec<table::frames::ActiveModel>,
-    pub timeline_participant_frames: Vec<table::timeline_participant_frames::ActiveModel>,
-    pub champion_stats: Vec<table::champion_stats::ActiveModel>,
-    pub damage_stats: Vec<table::damage_stats::ActiveModel>,
-    pub events_timeline: Vec<table::events_timeline::ActiveModel>,
-    pub match_timeline_victim_damage_dealt: Vec<table::match_timeline_victim_damage::ActiveModel>,
+    pub timeline: table::match_v5::timelines::ActiveModel,
+    pub timeline_participants: Vec<table::match_v5::timeline_participants::ActiveModel>,
+    pub frames: Vec<table::match_v5::frames::ActiveModel>,
+    pub timeline_participant_frames: Vec<table::match_v5::timeline_participant_frames::ActiveModel>,
+    pub champion_stats: Vec<table::match_v5::champion_stats::ActiveModel>,
+    pub damage_stats: Vec<table::match_v5::damage_stats::ActiveModel>,
+    pub events_timeline: Vec<table::match_v5::events_timeline::ActiveModel>,
+    pub match_timeline_victim_damage_dealt: Vec<table::match_v5::match_timeline_victim_damage::ActiveModel>,
 }
 
 pub fn all(timeline: match_v5::Timeline) -> TimelineModels {
@@ -20,7 +20,7 @@ pub fn all(timeline: match_v5::Timeline) -> TimelineModels {
 
     let timeline_model = timeline_to_model(timeline.clone());
 
-    let timeline_participants: Vec<table::timeline_participants::ActiveModel> = timeline
+    let timeline_participants: Vec<table::match_v5::timeline_participants::ActiveModel> = timeline
         .info
         .participants
         .unwrap_or_default()
@@ -66,8 +66,8 @@ pub fn all(timeline: match_v5::Timeline) -> TimelineModels {
     }
 }
 
-fn timeline_to_model(timeline: match_v5::Timeline) -> table::timelines::ActiveModel {
-    table::timelines::Model {
+fn timeline_to_model(timeline: match_v5::Timeline) -> table::match_v5::timelines::ActiveModel {
+    table::match_v5::timelines::Model {
         match_id: timeline.metadata.match_id,
         data_version: timeline.metadata.data_version,
         end_of_game_result: timeline.info.end_of_game_result,
@@ -80,8 +80,8 @@ fn timeline_to_model(timeline: match_v5::Timeline) -> table::timelines::ActiveMo
 fn participant_timeline_to_model(
     match_id: String,
     participant_time_line: match_v5::ParticipantTimeLine,
-) -> table::timeline_participants::ActiveModel {
-    table::timeline_participants::Model {
+) -> table::match_v5::timeline_participants::ActiveModel {
+    table::match_v5::timeline_participants::Model {
         puuid: participant_time_line.puuid,
         match_id,
         participant_id: participant_time_line.participant_id,
@@ -93,14 +93,14 @@ fn frames_to_model(
     match_id: String,
     ft: match_v5::FramesTimeLine,
 ) -> (
-    table::frames::ActiveModel,
-    Vec<table::timeline_participant_frames::ActiveModel>,
-    Vec<table::champion_stats::ActiveModel>,
-    Vec<table::damage_stats::ActiveModel>,
+    table::match_v5::frames::ActiveModel,
+    Vec<table::match_v5::timeline_participant_frames::ActiveModel>,
+    Vec<table::match_v5::champion_stats::ActiveModel>,
+    Vec<table::match_v5::damage_stats::ActiveModel>,
 ) {
     let frame_id = Uuid::new_v4();
 
-    let frame_model = table::frames::Model {
+    let frame_model = table::match_v5::frames::Model {
         frame_id,
         match_id,
         timestamp: ft.timestamp,
@@ -125,11 +125,11 @@ fn map_full_participant_frame(
     frame_id: Uuid,
     pf: match_v5::ParticipantFrame,
 ) -> (
-    table::timeline_participant_frames::ActiveModel,
-    table::champion_stats::ActiveModel,
-    table::damage_stats::ActiveModel,
+    table::match_v5::timeline_participant_frames::ActiveModel,
+    table::match_v5::champion_stats::ActiveModel,
+    table::match_v5::damage_stats::ActiveModel,
 ) {
-    let timeline_pf = table::timeline_participant_frames::Model {
+    let timeline_pf = table::match_v5::timeline_participant_frames::Model {
         frame_id,
         participant_id: pf.participant_id,
         current_gold: pf.current_gold,
@@ -156,8 +156,8 @@ fn champion_stats_to_model(
     frame_id: Uuid,
     participant_id: i32,
     stats: match_v5::ChampionStats,
-) -> table::champion_stats::ActiveModel {
-    table::champion_stats::Model {
+) -> table::match_v5::champion_stats::ActiveModel {
+    table::match_v5::champion_stats::Model {
         frame_id,
         participant_id,
         ability_haste: stats.ability_haste,
@@ -193,8 +193,8 @@ fn damage_stats_to_model(
     frame_id: Uuid,
     participant_id: i32,
     stats: match_v5::DamageStats,
-) -> table::damage_stats::ActiveModel {
-    table::damage_stats::Model {
+) -> table::match_v5::damage_stats::ActiveModel {
+    table::match_v5::damage_stats::Model {
         frame_id,
         participant_id,
         magic_damage_done: stats.magic_damage_done,
@@ -217,8 +217,8 @@ fn events_timeline_to_model(
     match_id: String,
     events_time_line: match_v5::EventsTimeLine,
 ) -> (
-    table::events_timeline::ActiveModel,
-    Vec<table::match_timeline_victim_damage::ActiveModel>,
+    table::match_v5::events_timeline::ActiveModel,
+    Vec<table::match_v5::match_timeline_victim_damage::ActiveModel>,
 ) {
     let event_timeline_id = Uuid::new_v4();
 
@@ -231,7 +231,7 @@ fn events_timeline_to_model(
     let team_id = events_time_line.team_id.map(|t| t as i32);
     let killer_team_id = events_time_line.killer_team_id.map(|t| t as i32);
 
-    let event_timeline_model = table::events_timeline::Model {
+    let event_timeline_model = table::match_v5::events_timeline::Model {
         event_timeline_id,
         match_id,
         timestamp: events_time_line.timestamp,
@@ -283,7 +283,7 @@ fn events_timeline_to_model(
                 create_victim_damage_model(
                     d,
                     event_timeline_id,
-                    table::sea_orm_active_enums::DamageDirection::Dealt,
+                    table::match_v5::sea_orm_active_enums::DamageDirection::Dealt,
                 )
             });
         let received = events_time_line
@@ -294,7 +294,7 @@ fn events_timeline_to_model(
                 create_victim_damage_model(
                     d,
                     event_timeline_id,
-                    table::sea_orm_active_enums::DamageDirection::Received,
+                    table::match_v5::sea_orm_active_enums::DamageDirection::Received,
                 )
             });
         dealt.chain(received).collect()
@@ -306,9 +306,9 @@ fn events_timeline_to_model(
 fn create_victim_damage_model(
     d: match_v5::MatchTimelineVictimDamage,
     event_timeline_id: Uuid,
-    direction: table::sea_orm_active_enums::DamageDirection,
-) -> table::match_timeline_victim_damage::ActiveModel {
-    table::match_timeline_victim_damage::Model {
+    direction: table::match_v5::sea_orm_active_enums::DamageDirection,
+) -> table::match_v5::match_timeline_victim_damage::ActiveModel {
+    table::match_v5::match_timeline_victim_damage::Model {
         id: Uuid::new_v4(),
         event_timeline_id,
         basic: d.basic,

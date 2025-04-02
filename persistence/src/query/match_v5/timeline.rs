@@ -6,7 +6,9 @@ impl Database {
     pub async fn insert_match_v5_timeline(&self, models: TimelineModels) -> Result<(), DbErr> {
         let txn: DatabaseTransaction = self.pool.begin().await?;
 
-        table::timelines::Entity::insert(models.timeline).exec(&txn).await?;
+        table::match_v5::timelines::Entity::insert(models.timeline)
+            .exec(&txn)
+            .await?;
         self.insert_many_chunks_512(models.timeline_participants, &txn).await?;
         self.insert_many_chunks_512(models.frames, &txn).await?;
         self.insert_many_chunks_512(models.timeline_participant_frames, &txn)

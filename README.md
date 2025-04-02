@@ -135,6 +135,9 @@ We can set the env variable inline
 DATABASE_URL=postgres://user:pass@localhost:5432/talent-scout sea-orm-cli generate entity -s <schema_name> -o <output_folder>
 ```
 
+I found a problem with types, when there is a type under a specific schema the program didn't identify that
+I had to manually edit its name to add the schema as prefix. see `table/match_v5/sea_orm_active_enums.rs`
+
 </details>
 
 ## Local environment

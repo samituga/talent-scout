@@ -3,7 +3,7 @@ use sea_orm::{DbErr, EntityTrait, PaginatorTrait, QuerySelect, TransactionTrait}
 use crate::{
     Database,
     mapper::match_v5::r#match,
-    table::{
+    table::match_v5::{
         bans, challenges, feats, matches, missions, objectives, participant_perks, participants, perk_style_selections,
         perk_styles, teams,
     },
