@@ -127,13 +127,13 @@ pub async fn fetch_all_match_ids(
     puuid: &str,
     route: riven::consts::RegionalRoute,
 ) -> anyhow::Result<Vec<String>> {
-    let match_v5 = api.match_v5();
     let mut all_match_ids = Vec::new();
     let mut start = 0;
     let count = 100;
 
     loop {
-        let match_ids = match_v5
+        let match_ids = api
+            .match_v5()
             .get_match_ids_by_puuid(route, puuid, Some(count), None, None, None, Some(start), None)
             .await?;
 
@@ -148,7 +148,7 @@ pub async fn fetch_all_match_ids(
     Ok(all_match_ids)
 }
 
-pub async fn fetch_match_info(
+async fn fetch_match_info(
     api: &riven::RiotApi,
     route: riven::consts::RegionalRoute,
     match_id: &str,
@@ -159,7 +159,7 @@ pub async fn fetch_match_info(
     }
 }
 
-pub async fn fetch_timeline(
+async fn fetch_timeline(
     api: &riven::RiotApi,
     route: riven::consts::RegionalRoute,
     match_id: &str,

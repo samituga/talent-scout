@@ -60,3 +60,11 @@ impl Database {
         &self.options
     }
 }
+
+pub struct Page<T> {
+    pub items: Vec<T>,
+    pub current_page: u64,
+    pub page_size: u64,
+    pub total_pages: u64,
+    pub total_items: u64,
+}

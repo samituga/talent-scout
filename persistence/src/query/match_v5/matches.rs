@@ -1,7 +1,7 @@
 use sea_orm::{DbErr, EntityTrait, PaginatorTrait, QuerySelect, TransactionTrait};
 
 use crate::{
-    Database,
+    Database, Page,
     mapper::match_v5::r#match,
     table::match_v5::{
         bans, challenges, feats, matches, missions, objectives, participant_perks, participants, perk_style_selections,
@@ -64,5 +64,30 @@ impl Database {
             .fetch_page(page)
             .await?;
         Ok(match_ids)
+    }
+
+    pub async fn fetch_puuids_from_match_v5_participants_paginated(
+        &self,
+        page: u64,
+        page_size: u64,
+    ) -> Result<Page<String>, DbErr> {
+        let paginator = participants::Entity::find()
+            .select_only()
+            .distinct()
+            .column(participants::Column::Puuid)
+            .into_tuple()
+            .paginate(&self.pool, page_size);
+
+        let items = paginator.fetch_page(page).await?;
+        let total_pages = paginator.num_pages().await?;
+        let total_items = paginator.num_items().await?;
+
+        Ok(Page {
+            items,
+            current_page: page,
+            page_size,
+            total_pages,
+            total_items,
+        })
     }
 }
