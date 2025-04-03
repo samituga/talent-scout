@@ -5,7 +5,7 @@ mod telemetry;
 
 use anyhow::Result;
 use dotenvy::dotenv;
-use ingestion_app::account_v1::ingestion::ingest_accounts;
+use ingestion_app::league_v4::ingest::ingest_big_leagues;
 use riven::{RiotApi, consts::PlatformRoute};
 
 use crate::{application::Application, config::get_configuration};
@@ -26,7 +26,7 @@ async fn main() -> Result<()> {
 
     let platform = PlatformRoute::EUW1;
 
-    ingest_accounts(&riot_api, platform, app.database.clone()).await?;
+    ingest_big_leagues(&riot_api, platform, app.database.clone()).await?;
 
     // let account = riot_api
     //     .account_v1()

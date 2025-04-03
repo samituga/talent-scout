@@ -1,5 +1,7 @@
 use anyhow::Context;
-use sea_orm::{ActiveModelTrait, ConnectOptions, ConnectionTrait, DatabaseConnection, DbErr, EntityTrait};
+use sea_orm::{
+    ActiveModelTrait, ConnectOptions, ConnectionTrait, DatabaseConnection, DbErr, EntityTrait, sea_query::OnConflict,
+};
 
 use crate::config::DatabaseSettings;
 
@@ -16,6 +18,8 @@ pub struct Database {
     pool: DatabaseConnection,
 }
 
+// TODO pagination, handle better chunks of data, caller should be able to
+// customize request
 impl Database {
     pub async fn new(config: &DatabaseSettings) -> Result<Self, anyhow::Error> {
         sqlx::any::install_default_drivers();
@@ -52,6 +56,58 @@ impl Database {
         for batch in models.chunks(batch_size) {
             let to_insert = batch.to_vec();
             T::Entity::insert_many(to_insert).exec(db).await?;
+        }
+        Ok(())
+    }
+
+    async fn insert_many_chunks_on_conflict_do_nothing<T, C: ConnectionTrait>(
+        &self,
+        models: Vec<T>,
+        db: &C,
+        batch_size: usize,
+    ) -> Result<(), DbErr>
+    where
+        T: ActiveModelTrait + Clone + Send + Sync + 'static,
+        T::Entity: EntityTrait,
+    {
+        if models.is_empty() {
+            return Ok(());
+        }
+        for batch in models.chunks(batch_size) {
+            let to_insert = batch.to_vec();
+            T::Entity::insert_many(to_insert)
+                .on_conflict_do_nothing()
+                .exec(db)
+                .await?;
+        }
+        Ok(())
+    }
+
+    pub async fn upsert_many_chunks<T, C: ConnectionTrait>(
+        &self,
+        models: Vec<T>,
+        conflict_columns: Vec<<T::Entity as EntityTrait>::Column>,
+        columns_to_update: Vec<<T::Entity as EntityTrait>::Column>,
+        db: &C,
+        batch_size: usize,
+    ) -> Result<(), DbErr>
+    where
+        T: ActiveModelTrait + Clone + Send + Sync + 'static,
+        T::Entity: EntityTrait,
+    {
+        if models.is_empty() {
+            return Ok(());
+        }
+        for batch in models.chunks(batch_size) {
+            let to_insert = batch.to_vec();
+            T::Entity::insert_many(to_insert)
+                .on_conflict(
+                    OnConflict::columns(conflict_columns.clone())
+                        .update_columns(columns_to_update.clone())
+                        .to_owned(),
+                )
+                .exec(db)
+                .await?;
         }
         Ok(())
     }

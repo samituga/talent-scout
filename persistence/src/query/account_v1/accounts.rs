@@ -1,4 +1,4 @@
-use sea_orm::{DbErr, EntityTrait, PaginatorTrait, QuerySelect};
+use sea_orm::{DbErr, EntityTrait, IntoActiveModel, PaginatorTrait, QuerySelect};
 
 use crate::{Database, Page, table, table::match_v5::participants};
 
@@ -7,6 +7,42 @@ impl Database {
         table::account_v1::accounts::Entity::insert(account)
             .exec(&self.pool)
             .await?;
+        Ok(())
+    }
+
+    pub async fn insert_account_if_not_exists(&self, puuid: String, region: String) -> Result<(), DbErr> {
+        let account = table::account_v1::accounts::Model {
+            puuid,
+            game_name: None,
+            tag_line: None,
+            region,
+        }
+        .into_active_model();
+
+        table::account_v1::accounts::Entity::insert(account)
+            .on_conflict_do_nothing()
+            .exec(&self.pool)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn insert_many_account_if_not_exists(&self, puuids: Vec<String>, region: String) -> Result<(), DbErr> {
+        let accounts = puuids
+            .into_iter()
+            .map(|puuid| {
+                table::account_v1::accounts::Model {
+                    puuid,
+                    game_name: None,
+                    tag_line: None,
+                    region: region.clone(),
+                }
+                .into_active_model()
+            })
+            .collect();
+
+        self.insert_many_chunks_on_conflict_do_nothing(accounts, &self.pool, 512)
+            .await?;
+
         Ok(())
     }
 
